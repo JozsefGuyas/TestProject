@@ -3,6 +3,7 @@ package com.gj.testproject;
 
 import com.gj.testproject.helper.CliOptions;
 import com.gj.testproject.helper.Configuration;
+import com.gj.testproject.task.FolderListenerTask;
 import java.io.File;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -20,24 +21,22 @@ public class TestprojectApplication {
     private final Options options = new Options();
     
     public static void main(String[] args) throws ParseException {
-        
-        TestprojectApplication application = new TestprojectApplication();
+       
+        var application = new TestprojectApplication();
         application.init();
         
         if (application.notContainsIncomingFolderPath(args)) {
             
-            HelpFormatter formatter = new HelpFormatter();
+            var formatter = new HelpFormatter();
             formatter.printHelp( "ant", application.getOptions() );
             log.error("Missing required option: -i");
             System.exit(1);
         }
         
-        Configuration configuration = application.createConfiguration(args);
+        var configuration = application.createConfiguration(args);
         
-        File f = new File("../valami/valami");
-        log.info(f.mkdirs());
-        
-        log.info(configuration.toString());
+        var folderListenerTask = new FolderListenerTask(configuration);
+        folderListenerTask.start();
         
     }
    
@@ -52,9 +51,9 @@ public class TestprojectApplication {
     
     private boolean notContainsIncomingFolderPath(String[] args) throws ParseException {
         
-        CommandLineParser parser = new DefaultParser();
+        var parser = new DefaultParser();
         
-        CommandLine cmd = parser.parse( options, args, true);
+        var cmd = parser.parse( options, args, true);
         
         return !cmd.hasOption(CliOptions.FOLDER_PATH.getOption());
         
@@ -62,16 +61,16 @@ public class TestprojectApplication {
     
     private Configuration createConfiguration(String[] args) throws ParseException {
         
-        Configuration configuration = new Configuration();       
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse( options, args, true);
+        var configuration = new Configuration();       
+        var parser = new DefaultParser();
+        var cmd = parser.parse( options, args, true);
        
         if (cmd.hasOption(CliOptions.FOLDER_PATH.getOption())) {
             configuration.setIncommingFolderPath(cmd.getOptionValue(CliOptions.FOLDER_PATH.getOption()));
         }
         
         if (cmd.hasOption(CliOptions.IDLE_TIMEOUT.getOption())) {
-            String idleTimeout = cmd.getOptionValue(CliOptions.IDLE_TIMEOUT.getOption());
+            var idleTimeout = cmd.getOptionValue(CliOptions.IDLE_TIMEOUT.getOption());
             if (isInteger(idleTimeout)) {
                 configuration.setIdleTimeoutSec(Integer.parseInt(idleTimeout));               
             } else {
@@ -82,7 +81,7 @@ public class TestprojectApplication {
         }
         
         if (cmd.hasOption(CliOptions.NUMBER_OF_THREAD.getOption())) {
-            String numberOfThread = cmd.getOptionValue(CliOptions.NUMBER_OF_THREAD.getOption());
+            var numberOfThread = cmd.getOptionValue(CliOptions.NUMBER_OF_THREAD.getOption());
             if (isInteger(numberOfThread)) {
               configuration.setWorkingThreadCount(Integer.parseInt(numberOfThread));
             } else {
@@ -93,7 +92,7 @@ public class TestprojectApplication {
         }
         
         if (cmd.hasOption(CliOptions.REPEAT_COUNT.getOption())) {
-            String repeatCount = cmd.getOptionValue(CliOptions.REPEAT_COUNT.getOption());
+            var repeatCount = cmd.getOptionValue(CliOptions.REPEAT_COUNT.getOption());
             if (isInteger(repeatCount)) {
               configuration.setWordpairRepeateCount(Integer.parseInt(repeatCount));
             } else {

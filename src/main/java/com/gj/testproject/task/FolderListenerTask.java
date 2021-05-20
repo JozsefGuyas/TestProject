@@ -10,26 +10,32 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RequiredArgsConstructor
-public class FolderListenerTask extends TimerTask{
-    
-    private final Configuration configuration;
+public class FolderListenerTask extends TimerTask implements Task{
     
     private static final int DELAY = 0;
     
     private static final int PERIOD = 500;
+    
+    private static final String TASK_NAME = "FolderListener";
+    
+    private final Configuration configuration;
+    
+    private File incomingFolder;
     
     private Timer timer;
     
     public void start() {
         
         if (isTimerNotRunning(timer)) {
-            timer = new Timer("FolderListener");        
+            timer = new Timer(TASK_NAME);        
             timer.schedule(this, DELAY, PERIOD);
             
-            File incomingFolder = new File(configuration.getIncommingFolderPath());
+            incomingFolder = new File(configuration.getIncommingFolderPath());
             if (isFolderNotExist(incomingFolder)) {
                 createFolder(incomingFolder);
             }
+            
+            log.info(TASK_NAME + " started");
         }
         
     }
@@ -42,10 +48,7 @@ public class FolderListenerTask extends TimerTask{
         }
     }
     
-    private boolean isFolderNotExist(File folder) {
-        return !folder.exists();
-    }
-    
+   
     private void createFolder(File folder) {
         if (!folder.mkdirs()) {
             log.error("Can not create folder! Invalid folder path! Accepted formats: ./example, ../example, /home/user/example");   
@@ -60,9 +63,23 @@ public class FolderListenerTask extends TimerTask{
     private boolean isTimerNotRunning(Timer timer) {
         return timer == null;
     }
+    
+    private boolean acceptedFiles(File file) {
+        return file.getName().endsWith("txt") 
+                || file.getName().endsWith("bmp")
+                || file.getName().endsWith("gif")
+                || file.getName().endsWith("png")
+                || file.getName().endsWith("jpg");
+    }
 
     @Override
     public void run() {
+        var files = incomingFolder.listFiles(this::acceptedFiles);
         
+        if (files.length > 0) {
+            
+        }
     }
+
+  
 }
