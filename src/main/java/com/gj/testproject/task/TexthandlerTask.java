@@ -42,9 +42,9 @@ public class TexthandlerTask implements Runnable, Task{
             
             var wordpairAsText = createTextFromResult(sortedWordPairs);
             
-            var destFolder = new File(textFile.getAbsolutePath() + DESTINATION_DONE_FOLDER);
+            var destFolder = new File(textFile.getParent()+ DESTINATION_DONE_FOLDER);
             
-            var destinationFile = new File(textFile.getAbsolutePath() + DESTINATION_DONE_FOLDER + textFile.getName());
+            var destinationFile = new File(textFile.getParent() + DESTINATION_DONE_FOLDER + textFile.getName());
             
             if (isFolderNotExist(destFolder)) {
                 destFolder.mkdirs();
