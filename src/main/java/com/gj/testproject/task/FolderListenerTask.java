@@ -2,11 +2,16 @@
 package com.gj.testproject.task;
 
 import com.gj.testproject.helper.Configuration;
+import com.gj.testproject.helper.FileHolder;
+import com.gj.testproject.helper.FileTypes;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.w3c.dom.Text;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -24,6 +29,10 @@ public class FolderListenerTask extends TimerTask implements Task{
     
     private Timer timer;
     
+    private FileHolder fileHolder = new FileHolder(); 
+    
+    private ExecutorService executorService;
+    
     public void start() {
         
         if (isTimerNotRunning(timer)) {
@@ -34,7 +43,7 @@ public class FolderListenerTask extends TimerTask implements Task{
             if (isFolderNotExist(incomingFolder)) {
                 createFolder(incomingFolder);
             }
-            
+            executorService = Executors.newFixedThreadPool(configuration.getWorkingThreadCount());
             log.info(TASK_NAME + " started");
         }
         
@@ -64,21 +73,42 @@ public class FolderListenerTask extends TimerTask implements Task{
         return timer == null;
     }
     
-    private boolean acceptedFiles(File file) {
-        return file.getName().endsWith("txt") 
-                || file.getName().endsWith("bmp")
+    private boolean textFileFilter(File file) {
+        return file.getName().endsWith("txt");
+    }
+    
+    private boolean imageFileFilter(File file) {
+        return  file.getName().endsWith("bmp")
                 || file.getName().endsWith("gif")
                 || file.getName().endsWith("png")
                 || file.getName().endsWith("jpg");
     }
+    
+    private void onFileprocessFinished(File file) {
+        
+    }
+    
 
     @Override
     public void run() {
-        var files = incomingFolder.listFiles(this::acceptedFiles);
         
-        if (files.length > 0) {
-            
+        var textFiles = incomingFolder.listFiles(this::textFileFilter);
+        
+        var imageFiles = incomingFolder.listFiles(this::imageFileFilter);
+        
+        fileHolder.addFiles(textFiles, FileTypes.TEXT_FILE);
+        
+        fileHolder.addFiles(imageFiles, FileTypes.IMAGE_FILE);
+        
+        for (var file : textFiles) {
+            if (fileHolder.isFileNotUnderProcess(file)) {
+                fileHolder.setUnderProcess(file, true);
+                TexthandlerTask texthandlerTask = new TexthandlerTask(file, configuration.getWordpairRepeateCount());
+                texthandlerTask.setOnProcessFinishedListener(this::onFileprocessFinished);
+                executorService.execute(texthandlerTask);
+            }
         }
+        
     }
 
   

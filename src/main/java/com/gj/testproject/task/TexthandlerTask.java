@@ -8,6 +8,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,6 +25,8 @@ public class TexthandlerTask implements Runnable, Task{
     private final File textFile;
     
     private final int maxWordPair;
+    
+    private TaskEventListener taskEventListener;
 
     @Override
     public void run() {
@@ -33,7 +36,11 @@ public class TexthandlerTask implements Runnable, Task{
             
             var wordpair = findWordPairs(message);
             
-            var wordpairAsText = createTextFromResult(wordpair);
+            var selectedWordPairs = selectWordPairs(wordpair, maxWordPair);
+            
+            var sortedWordPairs = sortWordPairs(selectedWordPairs);
+            
+            var wordpairAsText = createTextFromResult(sortedWordPairs);
             
             var destFolder = new File(textFile.getAbsolutePath() + DESTINATION_DONE_FOLDER);
             
@@ -48,6 +55,10 @@ public class TexthandlerTask implements Runnable, Task{
                     StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE,
                     StandardOpenOption.SYNC);
+            
+            Files.delete(textFile.toPath());
+            
+            fireOnProcessFinishedListener(textFile);
             
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
@@ -76,12 +87,34 @@ public class TexthandlerTask implements Runnable, Task{
         return wordpairs;
     }
     
+    private Map<String, Integer> selectWordPairs(Map<String, Integer> wordPairs, int count) {
+        return wordPairs.entrySet().stream()
+                .filter((map) -> map.getValue() > count)
+                .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
+    }
+    
+    private Map<String, Integer> sortWordPairs(Map<String, Integer> wordPairs) {
+        return wordPairs.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue())
+                .collect(Collectors.toMap(e -> e.getKey(),e -> e.getValue()));
+    }
+    
     private String createTextFromResult(Map<String, Integer> map) {
         var sb = new StringBuilder();
         map.forEach((word, count) -> {
             sb.append(word).append(" : ").append(count).append(System.lineSeparator());
         });
         return sb.toString();
+    }
+    
+    public void setOnProcessFinishedListener(TaskEventListener listener) {
+        this.taskEventListener = listener;
+    }
+    
+    private void fireOnProcessFinishedListener(File file) {
+        if (this.taskEventListener != null) {
+            this.taskEventListener.onProcessFinished(file);
+        }
     }
     
 }
