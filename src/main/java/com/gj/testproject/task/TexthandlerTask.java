@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Data;
@@ -94,9 +95,10 @@ public class TexthandlerTask implements Runnable, Task{
     }
     
     private Map<String, Integer> sortWordPairs(Map<String, Integer> wordPairs) {
+        
         return wordPairs.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue())
-                .collect(Collectors.toMap(e -> e.getKey(),e -> e.getValue()));
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
     
     private String createTextFromResult(Map<String, Integer> map) {
