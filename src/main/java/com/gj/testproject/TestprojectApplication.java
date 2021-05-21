@@ -4,11 +4,8 @@ package com.gj.testproject;
 import com.gj.testproject.helper.CliOptions;
 import com.gj.testproject.helper.Configuration;
 import com.gj.testproject.task.FolderListenerTask;
-import java.io.File;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -17,6 +14,11 @@ import org.apache.commons.cli.ParseException;
 
 @Log4j2
 public class TestprojectApplication {
+    
+    private static final int MINIMUM_THREAD_NUMBER = 1;
+    
+    private static final int MINIMUM_IDLE_TIMEOUT = 1;
+    
     @Getter
     private final Options options = new Options();
     
@@ -72,7 +74,15 @@ public class TestprojectApplication {
         if (cmd.hasOption(CliOptions.IDLE_TIMEOUT.getOption())) {
             var idleTimeout = cmd.getOptionValue(CliOptions.IDLE_TIMEOUT.getOption());
             if (isInteger(idleTimeout)) {
-                configuration.setIdleTimeoutSec(Integer.parseInt(idleTimeout));               
+                var timeout = Integer.parseInt(idleTimeout);
+                if (timeout < MINIMUM_IDLE_TIMEOUT) {
+                    log.info(CliOptions.IDLE_TIMEOUT.getOption() + " option can not be less than 1");
+                    log.info("Use default value: " + configuration.getIdleTimeoutSec());
+                } else {
+                    configuration.setIdleTimeoutSec(timeout);               
+                    
+                }
+                        
             } else {
                 log.info(CliOptions.IDLE_TIMEOUT.getOption() + " option is not number!");
                 log.info("Use default value: " + configuration.getIdleTimeoutSec());
@@ -83,7 +93,14 @@ public class TestprojectApplication {
         if (cmd.hasOption(CliOptions.NUMBER_OF_THREAD.getOption())) {
             var numberOfThread = cmd.getOptionValue(CliOptions.NUMBER_OF_THREAD.getOption());
             if (isInteger(numberOfThread)) {
-              configuration.setWorkingThreadCount(Integer.parseInt(numberOfThread));
+                var thread = Integer.parseInt(numberOfThread);
+                if (thread < MINIMUM_THREAD_NUMBER) {
+                    log.info(CliOptions.NUMBER_OF_THREAD.getOption() + " option can not be less than 1");
+                    log.info("Use default value: " + configuration.getWorkingThreadCount());
+                } else {
+                    configuration.setWorkingThreadCount(thread);               
+                    
+                }
             } else {
                 log.info(CliOptions.NUMBER_OF_THREAD.getOption() + " option is not number!");
                 log.info("Use default value: " + configuration.getWorkingThreadCount());
