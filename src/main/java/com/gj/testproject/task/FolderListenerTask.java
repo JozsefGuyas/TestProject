@@ -32,6 +32,8 @@ public class FolderListenerTask extends TimerTask implements Task{
     
     private ExecutorService executorService;
     
+    private IdleTimerTask idleTimerTask = new IdleTimerTask();
+    
     public void start() {
         
         if (isTimerNotRunning(timer)) {
@@ -43,6 +45,10 @@ public class FolderListenerTask extends TimerTask implements Task{
                 createFolder(incomingFolder);
             }
             executorService = Executors.newFixedThreadPool(configuration.getWorkingThreadCount());
+            
+            idleTimerTask.setOnIdleTimerListener(this::idleTimeout);
+            idleTimerTask.start(configuration.getIdleTimeoutSec());
+            
             log.info(TASK_NAME + " started");
         }
         
@@ -83,6 +89,12 @@ public class FolderListenerTask extends TimerTask implements Task{
                 || file.getName().endsWith("jpg");
     }
     
+    private void idleTimeout() {
+        log.info("idle timeout exit the program!");
+        executorService.shutdown();
+        System.exit(0);
+    }
+    
     private void onFileprocessFinished(File file) {
         fileHolder.remove(file);
         log.info("File process finished: " + file.getName());
@@ -117,19 +129,11 @@ public class FolderListenerTask extends TimerTask implements Task{
             if (task != null) {
                 task.setOnProcessFinishedListener(this::onFileprocessFinished);
                 executorService.execute(task);
-                
+                idleTimerTask.reset();
             }
             
         });
-//        for (var file : textFiles) {
-//            if (fileHolder.isFileNotUnderProcess(file)) {
-//                fileHolder.setUnderProcess(file, true);
-//                TexthandlerTask texthandlerTask = new TexthandlerTask(file, configuration.getWordpairRepeateCount());
-//                texthandlerTask.setOnProcessFinishedListener(this::onFileprocessFinished);
-//                executorService.execute(texthandlerTask);
-//            }
-//        }
-        
+      
     }
 
   
