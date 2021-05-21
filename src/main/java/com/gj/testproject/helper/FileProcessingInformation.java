@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class FileData {
+public class FileProcessingInformation {
     
     private File file;
     

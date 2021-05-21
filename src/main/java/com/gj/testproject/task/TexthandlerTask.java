@@ -4,7 +4,6 @@ package com.gj.testproject.task;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 @Data
 @Log4j2
 @RequiredArgsConstructor
-public class TexthandlerTask implements Runnable, Task{
+public class TexthandlerTask implements Task{
     
     private static final String DESTINATION_DONE_FOLDER = "/text-done/";
     
@@ -109,6 +108,7 @@ public class TexthandlerTask implements Runnable, Task{
         return sb.toString();
     }
     
+    @Override
     public void setOnProcessFinishedListener(TaskEventListener listener) {
         this.taskEventListener = listener;
     }

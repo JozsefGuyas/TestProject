@@ -2,16 +2,18 @@
 package com.gj.testproject.helper;
 
 import java.io.File;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FileHolder {
     
-    ConcurrentHashMap<String, FileData> fileHolder = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, FileProcessingInformation> fileHolder = new ConcurrentHashMap<>();
     
     public void addFiles(File[] files, FileTypes type) {
         for (var file : files) {
             if (!fileHolder.containsKey(file.getName())) {
-                fileHolder.put(file.getName(), new FileData(file, false, type));
+                fileHolder.put(file.getName(), new FileProcessingInformation(file, false, type));
             }
         }
     }
@@ -47,4 +49,7 @@ public class FileHolder {
         }
     }
     
+    public Map<String, FileProcessingInformation> getEntrys() {
+        return fileHolder;
+    }    
 }

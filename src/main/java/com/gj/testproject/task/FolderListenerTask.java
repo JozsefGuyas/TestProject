@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.w3c.dom.Text;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -85,10 +84,10 @@ public class FolderListenerTask extends TimerTask implements Task{
     }
     
     private void onFileprocessFinished(File file) {
-        
+        fileHolder.remove(file);
+        log.info("File process finished: " + file.getName());
     }
     
-
     @Override
     public void run() {
         
@@ -100,14 +99,36 @@ public class FolderListenerTask extends TimerTask implements Task{
         
         fileHolder.addFiles(imageFiles, FileTypes.IMAGE_FILE);
         
-        for (var file : textFiles) {
-            if (fileHolder.isFileNotUnderProcess(file)) {
-                fileHolder.setUnderProcess(file, true);
-                TexthandlerTask texthandlerTask = new TexthandlerTask(file, configuration.getWordpairRepeateCount());
-                texthandlerTask.setOnProcessFinishedListener(this::onFileprocessFinished);
-                executorService.execute(texthandlerTask);
+        fileHolder.getEntrys().forEach((key, value) -> {
+            Task task = null;
+            if (fileHolder.isFileNotUnderProcess(value.getFile())) {
+                if (value.getType().equals(FileTypes.TEXT_FILE)) {
+                
+                    fileHolder.setUnderProcess(value.getFile(), true);
+                    task = new TexthandlerTask(value.getFile(), configuration.getWordpairRepeateCount());
+                   
+                }
+                
+                if (value.getType().equals(FileTypes.IMAGE_FILE)) {
+                    fileHolder.setUnderProcess(value.getFile(), true);
+                    task = new ImageHandlerTask(value.getFile());
+                }
             }
-        }
+            if (task != null) {
+                task.setOnProcessFinishedListener(this::onFileprocessFinished);
+                executorService.execute(task);
+                
+            }
+            
+        });
+//        for (var file : textFiles) {
+//            if (fileHolder.isFileNotUnderProcess(file)) {
+//                fileHolder.setUnderProcess(file, true);
+//                TexthandlerTask texthandlerTask = new TexthandlerTask(file, configuration.getWordpairRepeateCount());
+//                texthandlerTask.setOnProcessFinishedListener(this::onFileprocessFinished);
+//                executorService.execute(texthandlerTask);
+//            }
+//        }
         
     }
 
