@@ -1,22 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout
-                    pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
         </Console>
-        <File name="MyFile" fileName="logs/log.log">
+        <RollingFile name="MyFile" fileName="log/${date:yyyy-MM-dd}.log" filePattern="log/log.%i.log.gz">
             <PatternLayout>
                 <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
             </PatternLayout>
-        </File>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
         <Async name="Async">
             <AppenderRef ref="MyFile"/>
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="debug" additivity="false">
+        <Root level="info" additivity="false">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="Async"/>
         </Root>
     </Loggers>
 </Configuration>

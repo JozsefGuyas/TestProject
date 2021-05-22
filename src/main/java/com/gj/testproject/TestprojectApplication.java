@@ -76,16 +76,16 @@ public class TestprojectApplication {
             if (isInteger(idleTimeout)) {
                 var timeout = Integer.parseInt(idleTimeout);
                 if (timeout < MINIMUM_IDLE_TIMEOUT) {
-                    log.info(CliOptions.IDLE_TIMEOUT.getOption() + " option can not be less than 1");
-                    log.info("Use default value: " + configuration.getIdleTimeoutSec());
+                    log.warn(CliOptions.IDLE_TIMEOUT.getOption() + " option can not be less than 1");
+                    log.warn("Use default value: " + configuration.getIdleTimeoutSec());
                 } else {
                     configuration.setIdleTimeoutSec(timeout);               
                     
                 }
                         
             } else {
-                log.info(CliOptions.IDLE_TIMEOUT.getOption() + " option is not number!");
-                log.info("Use default value: " + configuration.getIdleTimeoutSec());
+                log.warn(CliOptions.IDLE_TIMEOUT.getOption() + " option is not number!");
+                log.warn("Use default value: " + configuration.getIdleTimeoutSec());
             }
                     
         }
@@ -95,15 +95,15 @@ public class TestprojectApplication {
             if (isInteger(numberOfThread)) {
                 var thread = Integer.parseInt(numberOfThread);
                 if (thread < MINIMUM_THREAD_NUMBER) {
-                    log.info(CliOptions.NUMBER_OF_THREAD.getOption() + " option can not be less than 1");
-                    log.info("Use default value: " + configuration.getWorkingThreadCount());
+                    log.warn(CliOptions.NUMBER_OF_THREAD.getOption() + " option can not be less than 1");
+                    log.warn("Use default value: " + configuration.getWorkingThreadCount());
                 } else {
                     configuration.setWorkingThreadCount(thread);               
                     
                 }
             } else {
-                log.info(CliOptions.NUMBER_OF_THREAD.getOption() + " option is not number!");
-                log.info("Use default value: " + configuration.getWorkingThreadCount());
+                log.warn(CliOptions.NUMBER_OF_THREAD.getOption() + " option is not number!");
+                log.warn("Use default value: " + configuration.getWorkingThreadCount());
             }
             
         }
@@ -113,8 +113,8 @@ public class TestprojectApplication {
             if (isInteger(repeatCount)) {
               configuration.setWordpairRepeateCount(Integer.parseInt(repeatCount));
             } else {
-                log.info(CliOptions.REPEAT_COUNT.getOption() + " option is not number!");
-                log.info("Use default value: " + configuration.getWordpairRepeateCount());
+                log.warn(CliOptions.REPEAT_COUNT.getOption() + " option is not number!");
+                log.warn("Use default value: " + configuration.getWordpairRepeateCount());
             }
             
         }

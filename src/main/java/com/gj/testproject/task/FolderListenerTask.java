@@ -37,8 +37,6 @@ public class FolderListenerTask extends TimerTask implements Task{
     public void start() {
         
         if (isTimerNotRunning(timer)) {
-            timer = new Timer(TASK_NAME);        
-            timer.schedule(this, DELAY, PERIOD);
             
             incomingFolder = new File(configuration.getIncommingFolderPath());
             if (isFolderNotExist(incomingFolder)) {
@@ -48,6 +46,9 @@ public class FolderListenerTask extends TimerTask implements Task{
             
             idleTimerTask.setOnIdleTimerListener(this::idleTimeout);
             idleTimerTask.start(configuration.getIdleTimeoutSec());
+            
+            timer = new Timer(TASK_NAME);        
+            timer.schedule(this, DELAY, PERIOD);
             
             log.info(TASK_NAME + " started");
         }
@@ -65,7 +66,7 @@ public class FolderListenerTask extends TimerTask implements Task{
    
     private void createFolder(File folder) {
         if (!folder.mkdirs()) {
-            log.error("Can not create folder! Invalid folder path! Accepted formats: ./example, ../example, /home/user/example");   
+            log.error("Can not create folder! Invalid folder path or invalid format! Try these formats: ./example, ../example, /home/user/example, C://example");   
             System.exit(1);
         }
     }

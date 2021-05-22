@@ -58,11 +58,11 @@ public class TexthandlerTask implements Task{
             
             Files.delete(textFile.toPath());
             
-            fireOnProcessFinishedListener(textFile);
             
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         }
+        fireOnProcessFinishedListener(textFile);
     }
     
     private Map<String, Integer> findWordPairs(String message) {

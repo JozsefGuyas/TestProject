@@ -51,7 +51,7 @@ public class ImageHandlerTask implements Task {
         
             var series = new ImageProcessor().createHistogramFromImage(imageFile);
             
-            log.info(series.toString());
+            log.debug(series.toString());
             
             var histogram = createHistogram(series);
             
