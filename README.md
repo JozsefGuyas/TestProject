@@ -18,10 +18,10 @@ or
 
 ### Options
 #### Required parameters
-- i Incomming folder path (absolute or relative)
+- i - Incomming folder path (absolute or relative)
 
 #### Optional parameters
-- t Number of working threads.
-- n Word pairs count.
-- d Idle timeout in second
+- t - Number of working threads.
+- n - Word pairs count.
+- d - Idle timeout in second
 
