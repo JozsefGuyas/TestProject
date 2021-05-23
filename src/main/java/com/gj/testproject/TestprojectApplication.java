@@ -4,8 +4,11 @@ package com.gj.testproject;
 import com.gj.testproject.helper.CliOptions;
 import com.gj.testproject.helper.Configuration;
 import com.gj.testproject.task.FolderListenerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -22,23 +25,26 @@ public class TestprojectApplication {
     @Getter
     private final Options options = new Options();
     
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
        
         var application = new TestprojectApplication();
         application.init();
         
         if (application.notContainsIncomingFolderPath(args)) {
             
-            var formatter = new HelpFormatter();
-            formatter.printHelp( "ant", application.getOptions() );
-            log.error("Missing required option: -i");
+            application.showUsage(application.getOptions());        
+            
             System.exit(1);
         }
-        
+     
         var configuration = application.createConfiguration(args);
-        
+
+        log.info(configuration.toString());
+
         var folderListenerTask = new FolderListenerTask(configuration);
         folderListenerTask.start();
+            
+      
         
     }
    
@@ -51,21 +57,38 @@ public class TestprojectApplication {
 
     }
     
-    private boolean notContainsIncomingFolderPath(String[] args) throws ParseException {
+    private void showUsage(Options options) {
+        var formatter = new HelpFormatter();
+            formatter.printHelp( "ant", options );
+           
+    }
+    
+    private boolean notContainsIncomingFolderPath(String[] args) {
         
-        var parser = new DefaultParser();
-        
-        var cmd = parser.parse( options, args, true);
-        
-        return !cmd.hasOption(CliOptions.FOLDER_PATH.getOption());
+        try {
+            var parser = new DefaultParser();
+            
+            var cmd = parser.parse( options, args, false);
+            
+            return !cmd.hasOption(CliOptions.FOLDER_PATH.getOption());
+            
+        } catch (ParseException ex) {  
+            log.error(ex.getMessage());
+            return true;
+        }
         
     }
     
-    private Configuration createConfiguration(String[] args) throws ParseException {
+    private Configuration createConfiguration(String[] args) {
         
         var configuration = new Configuration();       
         var parser = new DefaultParser();
-        var cmd = parser.parse( options, args, true);
+        CommandLine cmd = null;
+        try {
+            cmd = parser.parse( options, args, false);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException(ex);
+        }
        
         if (cmd.hasOption(CliOptions.FOLDER_PATH.getOption())) {
             configuration.setIncommingFolderPath(cmd.getOptionValue(CliOptions.FOLDER_PATH.getOption()));
@@ -84,7 +107,7 @@ public class TestprojectApplication {
                 }
                         
             } else {
-                log.warn(CliOptions.IDLE_TIMEOUT.getOption() + " option is not number!");
+                
                 log.warn("Use default value: " + configuration.getIdleTimeoutSec());
             }
                     
@@ -102,7 +125,7 @@ public class TestprojectApplication {
                     
                 }
             } else {
-                log.warn(CliOptions.NUMBER_OF_THREAD.getOption() + " option is not number!");
+                
                 log.warn("Use default value: " + configuration.getWorkingThreadCount());
             }
             
@@ -113,7 +136,7 @@ public class TestprojectApplication {
             if (isInteger(repeatCount)) {
               configuration.setWordpairRepeateCount(Integer.parseInt(repeatCount));
             } else {
-                log.warn(CliOptions.REPEAT_COUNT.getOption() + " option is not number!");
+               
                 log.warn("Use default value: " + configuration.getWordpairRepeateCount());
             }
             
@@ -127,7 +150,7 @@ public class TestprojectApplication {
             int i = Integer.parseInt(number);
             return true;
         } catch (NumberFormatException e) {
-            log.debug(e.getMessage(), e);
+            log.warn(e.getMessage());
             return false;
         }
     }
